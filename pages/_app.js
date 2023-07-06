@@ -1,5 +1,18 @@
-import '@/styles/globals.css'
+import { createTheme, ThemeProvider } from "@mui/material";
 
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />
+function MyApp({ Component, pageProps }) {
+  const theme = createTheme({
+    typography: {
+      fontFamily: ["Russo One", "sans-serif"].join(","),
+      fontSize: "36px",
+    },
+  });
+
+  return (
+    <ThemeProvider theme={theme}>
+      <Component {...pageProps} />
+    </ThemeProvider>
+  );
 }
+
+export default MyApp;
