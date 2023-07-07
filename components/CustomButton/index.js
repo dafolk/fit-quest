@@ -14,7 +14,6 @@ const CustomButton = ({ text }) => {
         },
         borderRadius: "22px",
         boxShadow: "0px 4px 4px 0px #00000040",
-        mt: "100px",
       }}
     >
       {text}
