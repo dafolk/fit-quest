@@ -7,12 +7,14 @@ import React, { useRef, useEffect, useState } from "react";
 import { drawLandmarks } from "@mediapipe/drawing_utils";
 import { Pose } from "@mediapipe/pose";
 import * as cam from "@mediapipe/camera_utils";
+import { useRouter } from "next/router";
 // import instructions from "./instructions";
 
 export default function TutorialPage() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const poseEstimatorRef = useRef(null);
+  const router = useRouter();
   let camera = null;
 
   let _xPositionOfLeftEyeLandmark,
@@ -60,7 +62,7 @@ export default function TutorialPage() {
   });
 
   let targetx = 500,
-    targety = 500;
+    targety = 200;
   const targetWidth = 100;
   const targetHeight = 100;
 
@@ -181,6 +183,7 @@ export default function TutorialPage() {
 
         if (checkRightKnee()) {
           // go to the game play page.
+          router.push("/gameplay");
         }
       }
     }
@@ -318,7 +321,7 @@ export default function TutorialPage() {
     };
 
     runPoseEstimation();
-  }, []);
+  }, [router.query.username]);
 
   return (
     <Box
