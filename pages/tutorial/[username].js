@@ -1,43 +1,68 @@
 import CustomTitle from "@/components/CustomTitle";
 import Target from "@/components/Target";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Frame from "@/components/Frame";
 import WebCam from "@/components/WebCam";
-
 import React, { useRef, useEffect, useState } from "react";
 import { drawLandmarks } from "@mediapipe/drawing_utils";
 import { Pose } from "@mediapipe/pose";
 import * as cam from "@mediapipe/camera_utils";
+// import instructions from "./instructions";
 
 export default function TutorialPage() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-  let camera = null;
   const poseEstimatorRef = useRef(null);
+  let camera = null;
 
-  const rectX = 100;
-  const rectY = 35;
-  const rectWidth = 400;
-  const rectHeight = 650;
-  const rHandTargetX = 100;
-  const rHandTargetY = 200;
-  const lHandTargetX = 500;
-  const lHandTargetY = 200;
-  const rKneeTargetX = 150;
-  const rKneeTargetY = 500;
-  const lKneeTargetX = 350;
-  const lKneeTargetY = 500;
+  let _xPositionOfLeftEyeLandmark,
+    _xPositionOfRightEyeLandmark,
+    _xPositionOfLeftHandLandmark,
+    _xPositionOfRightHandLandmark,
+    _xPositionOfLeftKneeLandmark,
+    _xPositionOfRightKneeLandmark,
+    _xPositionOfLeftFootLandmark,
+    _xPositionOfRightFootLandmark,
+    _yPositionOfLefEyeLandmark,
+    _yPositionOfRightEyeLandmark,
+    _yPositionOfLeftHandLandmark,
+    _yPositionOfRightHandLandmark,
+    _yPositionOfLeftKneeLandmark,
+    _yPositionOfRightKneeLandmark,
+    _yPositionOfLeftFootLandmark,
+    _yPositionOfRightFootLandmark;
 
+  // const rectX = 100;
+  // const rectY = 35;
+  // const rectWidth = 400;
+  // const rectHeight = 650;
+  // const rectangle = [rectX, rectY, rectWidth, rectHeight];
+
+  const rectangle = {
+    xPositionStart: 100,
+    yPositionStart: 35,
+    width: 400,
+    height: 650,
+  };
+
+  const instructions = {
+    start: "Move into the frame to start",
+    hand: "Try to touch the yellow circles with your hands",
+    knee: "Try to touch the red circles with your knees",
+  };
+
+  const [targetX, setTargetX] = useState(500);
+  const [targetY, setTargetY] = useState(200);
+  const [altImg, setAltImg] = useState("yellow");
+  const [srcImg, setSrcImg] = useState("/assets/images/yellow.png");
+  const [instruction, setInstruction] = useState(() => {
+    return instructions.start;
+  });
+
+  let targetx = 500,
+    targety = 500;
   const targetWidth = 100;
   const targetHeight = 100;
-
-  let isBodyIndsideRect,
-    isLHandInsideTarget,
-    isRHandInsideTarget,
-    isLKneeInsideTarget,
-    isRKneeInsideTarget;
-
-  const rectangle = [rectX, rectY, rectWidth, rectHeight];
 
   function onPoseResults(results) {
     const videoWidth = webcamRef.current.video.videoWidth;
@@ -48,7 +73,9 @@ export default function TutorialPage() {
 
     const canvasElement = canvasRef.current;
     const canvasCtx = canvasElement.getContext("2d");
+
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
     canvasCtx.drawImage(
       results.image,
       0,
@@ -62,8 +89,8 @@ export default function TutorialPage() {
       const rEyeLm = results.poseLandmarks[5];
       const lHandLm = results.poseLandmarks[19];
       const rHandLm = results.poseLandmarks[20];
-      const lKneeLm = results.poseLandmarks[11]; //25
-      const rKneeLm = results.poseLandmarks[12]; //26
+      const lKneeLm = results.poseLandmarks[11]; //25 == left knee; 11 == left shoulder
+      const rKneeLm = results.poseLandmarks[12]; //26 == right knee; 12 == right shoulder
       const lFootLm = results.poseLandmarks[29];
       const rFootLm = results.poseLandmarks[30];
 
@@ -77,84 +104,84 @@ export default function TutorialPage() {
         lFootLm &&
         rFootLm
       ) {
-        const lEyeLmX = lEyeLm.x * videoWidth;
-        const lEyeLmY = lEyeLm.y * videoHeight;
-        const rEyeLmX = rEyeLm.x * videoWidth;
-        const rEyeLmY = rEyeLm.y * videoHeight;
-        const lHandLmX = lHandLm.x * videoWidth;
-        const lHandLmY = lHandLm.y * videoHeight;
-        const rHandLmX = rHandLm.x * videoWidth;
-        const rHandLmY = rHandLm.y * videoHeight;
-        const lKneeLmX = lKneeLm.x * videoWidth;
-        const lKneeLmY = lKneeLm.y * videoHeight;
-        const rKneeLmX = rKneeLm.x * videoWidth;
-        const rKneeLmY = rKneeLm.y * videoHeight;
-        const lFootLmX = lFootLm.x * videoWidth;
-        const lFootLmY = lFootLm.y * videoHeight;
-        const rFootLmX = rFootLm.x * videoWidth;
-        const rFootLmY = rFootLm.y * videoHeight;
+        _xPositionOfLeftEyeLandmark = lEyeLm.x * videoWidth;
+        _yPositionOfLefEyeLandmark = lEyeLm.y * videoHeight;
+
+        _xPositionOfRightEyeLandmark = rEyeLm.x * videoWidth;
+        _yPositionOfRightEyeLandmark = rEyeLm.y * videoHeight;
+
+        _xPositionOfLeftHandLandmark = lHandLm.x * videoWidth;
+        _yPositionOfLeftHandLandmark = lHandLm.y * videoHeight;
+
+        _xPositionOfRightHandLandmark = rHandLm.x * videoWidth;
+        _yPositionOfRightHandLandmark = rHandLm.y * videoHeight;
+
+        _xPositionOfLeftKneeLandmark = lKneeLm.x * videoWidth;
+        _yPositionOfLeftKneeLandmark = lKneeLm.y * videoHeight;
+
+        _xPositionOfRightKneeLandmark = rKneeLm.x * videoWidth;
+        _yPositionOfRightKneeLandmark = rKneeLm.y * videoHeight;
+
+        _xPositionOfLeftFootLandmark = lFootLm.x * videoWidth;
+        _yPositionOfLeftFootLandmark = lFootLm.y * videoHeight;
+
+        _xPositionOfRightFootLandmark = rFootLm.x * videoWidth;
+        _yPositionOfRightFootLandmark = rFootLm.y * videoHeight;
 
         const points = [
-          [lEyeLmX, lEyeLmY],
-          [rEyeLmX, rEyeLmY],
-          [lHandLmX, lHandLmY],
-          [rHandLmX, rHandLmY],
-          [lKneeLmX, lKneeLmY],
-          [rKneeLmX, rKneeLmY],
-          [lFootLmX, lFootLmY],
-          [rFootLmX, rFootLmY],
+          [_xPositionOfLeftEyeLandmark, _yPositionOfLefEyeLandmark],
+          [_xPositionOfRightEyeLandmark, _yPositionOfRightEyeLandmark],
+          [_xPositionOfLeftHandLandmark, _yPositionOfLeftHandLandmark],
+          [_xPositionOfRightHandLandmark, _yPositionOfRightHandLandmark],
+          [_xPositionOfLeftKneeLandmark, _yPositionOfLeftKneeLandmark],
+          [_xPositionOfRightKneeLandmark, _yPositionOfRightKneeLandmark],
+          [_xPositionOfLeftFootLandmark, _yPositionOfLeftFootLandmark],
+          [_xPositionOfRightFootLandmark, _yPositionOfRightFootLandmark],
         ];
 
-        isBodyIndsideRect = isBodyInsideRectangle(points, rectangle);
-        isLHandInsideTarget = isLmInsideTargets(
-          lHandLmX,
-          lHandLmY,
-          lHandTargetX,
-          lHandTargetY,
-          targetWidth,
-          targetHeight
-        );
-        isRHandInsideTarget = isLmInsideTargets(
-          rHandLmX,
-          rHandLmY,
-          rHandTargetX,
-          rHandTargetY,
-          targetWidth,
-          targetHeight
-        );
-        isLKneeInsideTarget = isLmInsideTargets(
-          lKneeLmX,
-          lKneeLmY,
-          lKneeTargetX,
-          lKneeTargetY,
-          targetWidth,
-          targetHeight
-        );
-        isRKneeInsideTarget = isLmInsideTargets(
-          rKneeLmX,
-          rKneeLmY,
-          rKneeTargetX,
-          rKneeTargetY,
-          targetWidth,
-          targetHeight
-        );
-
-        // if (isLHandInsideTarget || isRHandInsideTarget || isLKneeInsideTarget || isRKneeInsideTarget){
-        //   console.log("It is in!")
+        // if (isBodyInsideRectangle(points, rectangle)) {
+        //   targetx = 500;
+        //   targety = 200;
+        //   setTargetX(500);
+        //   setTargetY(200);
+        //   setAltImg("red");
+        //   setSrcImg("/assets/images/red.png");
+        //   setInstruction("Try to touch the Yellow circle with your Hands");
         // }
 
-        // if (isLHandInsideTarget){
-        //   console.log("Left Hand is inside left Red Target!")
-        // }
-        // if (isRHandInsideTarget){
-        //   console.log("Right Hand is inside right Red Target!")
-        // }
-        // if (isLKneeInsideTarget){
-        //   console.log("Left Eye is inside left Blue Target!")
-        // }
-        // if (isRKneeInsideTarget){
-        //   console.log("Right Eye is inside right Blue Target!")
-        // }
+        if (checkLeftHand()) {
+          nextInstructionAndTarget(
+            100,
+            200,
+            "yellow",
+            "/assets/images/yellow.png",
+            instructions.hand
+          );
+        }
+
+        if (checkRightHand()) {
+          nextInstructionAndTarget(
+            350,
+            500,
+            "red",
+            "/assets/images/red.png",
+            instructions.knee
+          );
+        }
+
+        if (checkLeftKnee()) {
+          nextInstructionAndTarget(
+            150,
+            500,
+            "red",
+            "/assets/images/red.png",
+            instructions.knee
+          );
+        }
+
+        if (checkRightKnee()) {
+          // go to the game play page.
+        }
       }
     }
 
@@ -167,39 +194,86 @@ export default function TutorialPage() {
     canvasCtx.restore();
   }
 
-  function isBodyInsideRectangle(points, rectangle) {
-    // Unpack the rectangle coordinates
-    const [rectX, rectY, rectWidth, rectHeight] = rectangle;
+  function nextInstructionAndTarget(
+    xPosition,
+    yPosition,
+    imgAltText,
+    imgSrc,
+    instruction
+  ) {
+    targetx = xPosition;
+    targety = yPosition;
+    setTargetX(xPosition);
+    setTargetY(yPosition);
+    setAltImg(imgAltText);
+    setSrcImg(imgSrc);
+    setInstruction(() => {
+      return instruction;
+    });
+  }
 
-    // Check if every point satisfies the condition of being inside the rectangle
+  function checkLeftHand() {
+    return isLmInsideTargets(
+      _xPositionOfLeftHandLandmark,
+      _yPositionOfLeftHandLandmark,
+      targetx,
+      targety
+    );
+  }
+
+  function checkRightHand() {
+    return isLmInsideTargets(
+      _xPositionOfRightHandLandmark,
+      _yPositionOfRightHandLandmark,
+      targetx,
+      targety
+    );
+  }
+
+  function checkLeftKnee() {
+    return isLmInsideTargets(
+      _xPositionOfLeftKneeLandmark,
+      _yPositionOfLeftKneeLandmark,
+      targetx,
+      targety
+    );
+  }
+
+  function checkRightKnee() {
+    return isLmInsideTargets(
+      _xPositionOfRightKneeLandmark,
+      _yPositionOfRightKneeLandmark,
+      targetx,
+      targety
+    );
+  }
+
+  function isBodyInsideRectangle(points) {
     return points.every(([pointX, pointY]) => {
-      // Check if the point is inside the rectangle using an if condition
       if (
-        pointX >= rectX &&
-        pointX <= rectX + rectWidth &&
-        pointY >= rectY &&
-        pointY <= rectY + rectHeight
+        pointX >= rectangle.xPositionStart &&
+        pointX <= rectangle.xPositionStart + rectangle.width &&
+        pointY >= rectangle.yPositionStart &&
+        pointY <= rectangle.yPositionStart + rectangle.height
       ) {
-        return true; // Point is inside the rectangle
+        return true;
       } else {
-        return false; // Point is outside the rectangle
+        return false;
       }
     });
   }
 
   function isLmInsideTargets(
-    lmX,
-    lmY,
-    targetX,
-    targetY,
-    targetWidth,
-    targetHeight
+    xPositionOfLandmark,
+    yPositionOfLandmark,
+    xPositionOfTarget,
+    yPositionOfTarget
   ) {
     if (
-      lmX >= targetX &&
-      lmX <= targetX + targetWidth &&
-      lmY >= targetY &&
-      lmY <= targetY + targetHeight
+      xPositionOfLandmark >= xPositionOfTarget &&
+      xPositionOfLandmark <= xPositionOfTarget + targetWidth &&
+      yPositionOfLandmark >= yPositionOfTarget &&
+      yPositionOfLandmark <= yPositionOfTarget + targetHeight
     ) {
       return true;
     } else {
@@ -253,49 +327,27 @@ export default function TutorialPage() {
       flexDirection={"column"}
       justifyContent={"center"}
       alignItems={"center"}
-      width={"700px"}
+      width={"450px"}
     >
-      <CustomTitle text={"Move into the frame to start"} />
+      <CustomTitle text={instruction} />
       <Box
         position={"relative"}
         width={"620px"}
         height={"720px"}
-        style={{
+        sx={{
           transform: "scaleX(-1)",
         }}
       >
         <WebCam webcamRef={webcamRef} canvasRef={canvasRef} />
         <Frame
           borderColor={"green"}
-          w={rectWidth}
-          h={rectHeight}
-          x={rectX}
-          y={rectY}
+          w={rectangle.width}
+          h={rectangle.height}
+          x={rectangle.xPositionStart}
+          y={rectangle.yPositionStart}
         />
-        <Target
-          x={lHandTargetX}
-          y={lHandTargetY}
-          alt={"red"}
-          src={"/assets/images/red.png"}
-        />
-        <Target
-          x={rHandTargetX}
-          y={rHandTargetY}
-          alt={"red"}
-          src={"/assets/images/red.png"}
-        />
-        <Target
-          x={lKneeTargetX}
-          y={lKneeTargetY}
-          alt={"blue"}
-          src={"/assets/images/blue.png"}
-        />
-        <Target
-          x={rKneeTargetX}
-          y={rKneeTargetY}
-          alt={"blue"}
-          src={"/assets/images/blue.png"}
-        />
+
+        <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
       </Box>
     </Box>
   );
