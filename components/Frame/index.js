@@ -1,15 +1,15 @@
 import { Box } from "@mui/material";
 
-const Frame = ({ borderColor }) => {
+const Frame = ({ borderColor, w, h, x, y }) => {
   return (
     <Box
       sx={{
         border: `dashed ${borderColor}`,
-        width: "300px",
-        height: "500px",
+        width: `${w}px`,
+        height: `${h}px`,
         position: "absolute",
-        zIndex: 2,
-        transform: "translate(100px, 100px)",
+        zIndex: 3,
+        transform: `translate(${x}px, ${y}px)`,
       }}
     ></Box>
   );
