@@ -15,20 +15,21 @@ const getUsersWithScores = async () => {
   });
 };
 
-const createUser = async (username, score) => {
+const createUser = async (username) => {
   await prisma.users.create({
     data: {
       username: username,
-      scores: {
-        create: {
-          score: score,
-        },
-      },
     },
   });
 };
 
-const getUserWithUsername = async () => {};
+const getUserIdWithUsername = async (username) => {
+  return await prisma.users.findFirst({
+    where: {
+      username: username,
+    },
+  });
+};
 
 module.exports = { getUsersWithScores, createUser };
 

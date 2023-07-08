@@ -1,8 +1,9 @@
 import { Button, Typography } from "@mui/material";
 
-const CustomButton = ({ text }) => {
+const CustomButton = ({ text, onClickHandler }) => {
   return (
     <Button
+      onClick={onClickHandler}
       variant="contained"
       sx={{
         fontSize: "36px",

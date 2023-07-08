@@ -2,7 +2,7 @@ import { Box, Container } from "@mui/material";
 import React, { useRef, useEffect, useState } from "react";
 import Webcam from "react-webcam";
 
-const WebCam = ({webcamRef, canvasRef}) => {
+const WebCam = ({ webcamRef, canvasRef }) => {
   return (
     <Box>
       <Webcam
@@ -17,7 +17,7 @@ const WebCam = ({webcamRef, canvasRef}) => {
           zIndex: 1,
           width: 620,
           height: 720,
-          borderRadius: "10px",
+          borderRadius: "20px",
         }}
         videoConstraints={{
           width: 620,
@@ -25,7 +25,6 @@ const WebCam = ({webcamRef, canvasRef}) => {
         }}
       />
       <canvas
-      
         ref={canvasRef}
         className="output_canvas"
         style={{
@@ -38,6 +37,7 @@ const WebCam = ({webcamRef, canvasRef}) => {
           zIndex: 2,
           width: 620,
           height: 720,
+          borderRadius: "20px",
         }}
       ></canvas>
     </Box>
