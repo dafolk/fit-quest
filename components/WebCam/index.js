@@ -1,27 +1,46 @@
+import { Box, Container } from "@mui/material";
+import React, { useRef, useEffect, useState } from "react";
 import Webcam from "react-webcam";
 
-const WebCam = ({ WebCamRef, CanvasRef }) => {
+const WebCam = ({webcamRef, canvasRef}) => {
   return (
-    <Webcam
-      ref={WebCamRef}
-      style={{
-        position: "absolute",
-        marginLeft: "auto",
-        marginRight: "auto",
-        left: 0,
-        right: 0,
-        textAlign: "center",
-        zIndex: 1,
-        width: 500,
-        height: 700,
-        borderRadius: "10px",
-        transform: "scaleX(-1)",
-      }}
-      videoConstraints={{
-        width: 500,
-        height: 700,
-      }}
-    />
+    <Box>
+      <Webcam
+        ref={webcamRef}
+        style={{
+          position: "absolute",
+          marginLeft: "auto",
+          marginRight: "auto",
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          zIndex: 1,
+          width: 620,
+          height: 720,
+          borderRadius: "10px",
+        }}
+        videoConstraints={{
+          width: 620,
+          height: 720,
+        }}
+      />
+      <canvas
+      
+        ref={canvasRef}
+        className="output_canvas"
+        style={{
+          position: "absolute",
+          marginLeft: "auto",
+          marginRight: "auto",
+          left: 0,
+          right: 0,
+          textAlign: "center",
+          zIndex: 2,
+          width: 620,
+          height: 720,
+        }}
+      ></canvas>
+    </Box>
   );
 };
 

@@ -6,10 +6,10 @@ const Target = ({ x, y, alt, src }) => {
       sx={{
         bgcolor: "black",
         position: "absolute",
-        zIndex: 3,
-        transform: `translate(${x}, ${y})`,
-        width: "50px",
-        height: "50px",
+        zIndex: 4,
+        transform: `translate(${x}px, ${y}px)`,
+        width: "100px",
+        height: "100px",
       }}
       alt={alt}
       src={src}
