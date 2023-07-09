@@ -53,16 +53,17 @@ export default function TutorialPage() {
     knee: "Try to touch the red circles with your knees",
   };
 
-  const [targetX, setTargetX] = useState(500);
-  const [targetY, setTargetY] = useState(200);
-  const [altImg, setAltImg] = useState("yellow");
-  const [srcImg, setSrcImg] = useState("/assets/images/yellow.png");
+  const [targetX, setTargetX] = useState(0);
+  const [targetY, setTargetY] = useState(0);
+  const [altImg, setAltImg] = useState("");
+  const [srcImg, setSrcImg] = useState("");
+  const [isBodyInsideRect, setIsBodyInsideRect] = useState(false);
   const [instruction, setInstruction] = useState(() => {
     return instructions.start;
   });
 
-  let targetx = 500,
-    targety = 200;
+  let targetx = 0,
+    targety = 0;
   const targetWidth = 100;
   const targetHeight = 100;
 
@@ -91,8 +92,8 @@ export default function TutorialPage() {
       const rEyeLm = results.poseLandmarks[5];
       const lHandLm = results.poseLandmarks[19];
       const rHandLm = results.poseLandmarks[20];
-      const lKneeLm = results.poseLandmarks[11]; //25 == left knee; 11 == left shoulder
-      const rKneeLm = results.poseLandmarks[12]; //26 == right knee; 12 == right shoulder
+      const lKneeLm = results.poseLandmarks[25]; //25 == left knee; 11 == left shoulder
+      const rKneeLm = results.poseLandmarks[26]; //26 == right knee; 12 == right shoulder
       const lFootLm = results.poseLandmarks[29];
       const rFootLm = results.poseLandmarks[30];
 
@@ -141,17 +142,18 @@ export default function TutorialPage() {
           [_xPositionOfRightFootLandmark, _yPositionOfRightFootLandmark],
         ];
 
-        // if (isBodyInsideRectangle(points, rectangle)) {
-        //   targetx = 500;
-        //   targety = 200;
-        //   setTargetX(500);
-        //   setTargetY(200);
-        //   setAltImg("red");
-        //   setSrcImg("/assets/images/red.png");
-        //   setInstruction("Try to touch the Yellow circle with your Hands");
-        // }
+        if (isBodyInsideRectangle(points, rectangle)) {
+          targetx = 500;
+          targety = 200;
+          setTargetX(500);
+          setTargetY(200);
+          setAltImg("yellow");
+          setIsBodyInsideRect(true);
+          setSrcImg("/assets/images/yellow.png");
+          setInstruction("Try to touch the Yellow circle with your Hands");
+        }
 
-        if (checkLeftHand()) {
+        if (checkLeftHand() && targetx == 500 && targety == 200) {
           nextInstructionAndTarget(
             100,
             200,
@@ -161,7 +163,7 @@ export default function TutorialPage() {
           );
         }
 
-        if (checkRightHand()) {
+        if (checkRightHand() && targetx == 100 && targety == 200) {
           nextInstructionAndTarget(
             350,
             500,
@@ -171,7 +173,7 @@ export default function TutorialPage() {
           );
         }
 
-        if (checkLeftKnee()) {
+        if (checkLeftKnee() && targetx == 350 && targety == 500) {
           nextInstructionAndTarget(
             150,
             500,
@@ -181,7 +183,7 @@ export default function TutorialPage() {
           );
         }
 
-        if (checkRightKnee()) {
+        if (checkRightKnee() && targetx == 150 && targety == 500) {
           // go to the game play page.
           router.push("/gameplay");
         }
@@ -349,8 +351,9 @@ export default function TutorialPage() {
           x={rectangle.xPositionStart}
           y={rectangle.yPositionStart}
         />
-
-        <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
+          
+        { isBodyInsideRect && <Target x={targetX} y={targetY} alt={altImg} src={srcImg} /> }
+        
       </Box>
     </Box>
   );
