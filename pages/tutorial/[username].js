@@ -66,6 +66,7 @@ export default function TutorialPage() {
     targety = 0;
   const targetWidth = 100;
   const targetHeight = 100;
+  let didBodyFunctionRun = false;
 
   function onPoseResults(results) {
     const videoWidth = webcamRef.current.video.videoWidth;
@@ -142,7 +143,7 @@ export default function TutorialPage() {
           [_xPositionOfRightFootLandmark, _yPositionOfRightFootLandmark],
         ];
 
-        if (isBodyInsideRectangle(points, rectangle)) {
+        if (didBodyFunctionRun == false && isBodyInsideRectangle(points, rectangle)) {
           targetx = 500;
           targety = 200;
           setTargetX(500);
@@ -150,10 +151,11 @@ export default function TutorialPage() {
           setAltImg("yellow");
           setIsBodyInsideRect(true);
           setSrcImg("/assets/images/yellow.png");
-          setInstruction("Try to touch the Yellow circle with your Hands");
+          setInstruction(instructions.hand);
+          didBodyFunctionRun = true
         }
 
-        if (checkLeftHand() && targetx == 500 && targety == 200) {
+        if (targetx == 500 && targety == 200 && checkLeftHand()) {
           nextInstructionAndTarget(
             100,
             200,
@@ -163,7 +165,7 @@ export default function TutorialPage() {
           );
         }
 
-        if (checkRightHand() && targetx == 100 && targety == 200) {
+        else if (targetx == 100 && targety == 200 && checkRightHand()) {
           nextInstructionAndTarget(
             350,
             500,
@@ -173,7 +175,7 @@ export default function TutorialPage() {
           );
         }
 
-        if (checkLeftKnee() && targetx == 350 && targety == 500) {
+        else if (targetx == 350 && targety == 500 && checkLeftKnee()) {
           nextInstructionAndTarget(
             150,
             500,
@@ -183,7 +185,7 @@ export default function TutorialPage() {
           );
         }
 
-        if (checkRightKnee() && targetx == 150 && targety == 500) {
+        else if (targetx == 150 && targety == 500 && checkRightKnee()) {
           // go to the game play page.
           router.push("/gameplay");
         }
