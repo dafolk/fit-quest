@@ -34,7 +34,8 @@ export default function Gameplay() {
 
   let targetx = 500,
     targety = 200,
-    timerCounter = 30;
+    timerCounter = 30,
+    finalScore = 0;
   const targetWidth = 100;
   const targetHeight = 100;
   const heightMidpoint = 720 / 2;
@@ -80,7 +81,6 @@ export default function Gameplay() {
 
         if (targety <= 360 && (checkLeftHand() || checkRightHand())) {
           setScore((prevScore) => prevScore + 1);
-
           nextInstructionAndTarget(
             Math.random() * (videoWidth - targetWidth),
             Math.random() * (heightMidpoint - targetHeight - 150) +
@@ -117,6 +117,8 @@ export default function Gameplay() {
     setTargetY(yPosition);
     setAltImg(imgAltText);
     setSrcImg(imgSrc);
+    finalScore++;
+    console.log(finalScore);
   }
 
   function checkLeftHand() {
@@ -206,29 +208,84 @@ export default function Gameplay() {
       camera.start();
     }
   };
+
+  const checkExistingUser = async () => {
+    const data = {
+      username: router.query.username,
+    };
+
+    const JSONdata = JSON.stringify(data);
+
+    const endpoint = `/api/users/${router.query.username}`;
+
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    const response = await fetch(endpoint, options);
+    const result = await response.json();
+    console.log(result.data);
+    return result.data;
+  };
+
+  const storeResult = async () => {
+    const data = {
+      username: router.query.username,
+      score: finalScore,
+    };
+
+    const JSONdata = JSON.stringify(data);
+
+    if (!checkExistingUser()) {
+      const endpoint = "/api/users";
+
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSONdata,
+      };
+
+      await fetch(endpoint, options).json;
+    } else {
+      const endpoint = `/api/users/${router.query.username}`;
+
+      const options = {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSONdata,
+      };
+      await fetch(endpoint, options);
+    }
+  };
+
   useEffect(() => {
     runPoseEstimation();
-    const interval = setInterval(() => {
-      if (timerCounter > 0) {
-        console.log(timerCounter);
-        setTimer((prevCount) => --prevCount);
-        --timerCounter;
-      } else {
-        console.log("running else");
-        if (camera) {
-          camera.stop(); // Stop the camera when navigating away from the component
-          router.replace({
-            pathname: "/result/[username]",
-            query: { username: router.query.username },
-          });
-        } else {
-          console.log(camera);
-        }
-      }
-    }, 1000);
-    return () => {
-      clearTimeout(interval);
-    };
+    // const interval = setInterval(() => {
+    //   if (timerCounter > 0) {
+    //     setTimer((prevCount) => --prevCount);
+    //     --timerCounter;
+    //   } else {
+    //     console.log(finalScore);
+    //     if (camera) {
+    //       storeResult();
+    //       camera.stop(); // Stop the camera when navigating away from the component
+    //       router.replace({
+    //         pathname: "/result/[username]",
+    //         query: { username: router.query.username },
+    //       });
+    //     }
+    //   }
+    // }, 1000);
+    // return () => {
+    //   clearTimeout(interval);
+    // };
   }, [router.query.username]);
 
   return (
@@ -253,7 +310,7 @@ export default function Gameplay() {
           justifyContent={"center"}
           alignItems={"center"}
         >
-          <CustomTitle text={"score : "} />
+          <CustomTitle text={"score : "} mr={"10px"} />
           <CustomTitle text={score} />
         </Box>
         <Box
@@ -262,7 +319,7 @@ export default function Gameplay() {
           justifyContent={"center"}
           alignItems={"baseline"}
         >
-          <CustomTitle text={timer} fontSize={"60px"} />
+          <CustomTitle text={timer} fontSize={"60px"} mr={"10px"} />
           <CustomTitle text={" seconds"} />
         </Box>
       </Box>
@@ -277,6 +334,48 @@ export default function Gameplay() {
         <WebCam webcamRef={webcamRef} canvasRef={canvasRef} />
 
         <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
+        <Typography
+          style={{
+            position: "absolute",
+            zIndex: 4,
+            marginLeft: "230px",
+            marginRight: "230px",
+            marginTop: "100px",
+            transform: "scaleX(-1)",
+          }}
+        >
+          Ready ?
+        </Typography>
+        <Box
+          sx={{
+            position: "absolute",
+            zIndex: 4,
+            transform: "scaleX(-1)",
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              transform: "translate(-385px, 250px)",
+            }}
+          >
+            <img
+              alt="cd"
+              src="/assets/images/CountDown.png"
+              style={{ position: "absolute", borderRadius: "44px  " }}
+            />
+            <Typography
+              sx={{
+                position: "absolute",
+                color: "white",
+                fontSize: "90px",
+                transform: "translate(53px, 15px)",
+              }}
+            >
+              3
+            </Typography>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

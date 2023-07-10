@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import CustomButton from "../components/CustomButton";
 import Input from "../components/Input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function SignUpPage() {
@@ -11,32 +11,32 @@ export default function SignUpPage() {
   const storeUsername = async (event) => {
     event.preventDefault();
 
-    // Get data from the form.
-    const data = {
-      username: username,
-    };
+    if (!isUserAlreadyExists) {
+      const data = {
+        username: username,
+      };
 
-    // Send the data to the server in JSON format.
-    const JSONdata = JSON.stringify(data);
+      const JSONdata = JSON.stringify(data);
 
-    // API endpoint where we send form data.
-    const endpoint = "/api/users";
+      const endpoint = "/api/users";
 
-    // Form the request for sending data to the server.
-    const options = {
-      // The method is POST because we are sending data.
-      method: "POST",
-      // Tell the server we're sending JSON.
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // Body of the request is the JSON data we created above.
-      body: JSONdata,
-    };
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSONdata,
+      };
 
-    // Send the form data to our forms API on Vercel and get a response.
-    const result = await fetch(endpoint, options);
+      const result = await fetch(endpoint, options);
+    }
   };
+
+  // useEffect(() => {
+  //   const isUserAlreadyExists = () => {
+  //     return getUserWithUsername() ? true : false;
+  //   };
+  // });
 
   const goToTutorial = () => {
     router.push({
@@ -44,6 +44,7 @@ export default function SignUpPage() {
       query: { username: username },
     });
   };
+
   return (
     <Box
       margin={"auto"}

@@ -12,7 +12,7 @@ const instructions = {
           }
         `}</style>
       </span>
-      circle with your{" "}
+      circle with your
       <span className="highlight">
         {" "}
         Hands{" "}
@@ -36,7 +36,7 @@ const instructions = {
           }
         `}</style>
       </span>
-      circle with your{" "}
+      circle with your
       <span className="highlight">
         {" "}
         Knees{" "}
