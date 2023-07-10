@@ -8,7 +8,7 @@ import { drawLandmarks } from "@mediapipe/drawing_utils";
 import { Pose } from "@mediapipe/pose";
 import * as cam from "@mediapipe/camera_utils";
 import { useRouter } from "next/router";
-// import instructions from "./instructions";
+import instructions from "./instructions";
 
 export default function TutorialPage() {
   const webcamRef = useRef(null);
@@ -34,23 +34,11 @@ export default function TutorialPage() {
     _yPositionOfLeftFootLandmark,
     _yPositionOfRightFootLandmark;
 
-  // const rectX = 100;
-  // const rectY = 35;
-  // const rectWidth = 400;
-  // const rectHeight = 650;
-  // const rectangle = [rectX, rectY, rectWidth, rectHeight];
-
   const rectangle = {
     xPositionStart: 100,
     yPositionStart: 35,
     width: 400,
     height: 650,
-  };
-
-  const instructions = {
-    start: "Move into the frame to start",
-    hand: "Try to touch the yellow circles with your hands",
-    knee: "Try to touch the red circles with your knees",
   };
 
   const [targetX, setTargetX] = useState(0);
@@ -143,7 +131,10 @@ export default function TutorialPage() {
           [_xPositionOfRightFootLandmark, _yPositionOfRightFootLandmark],
         ];
 
-        if (didBodyFunctionRun == false && isBodyInsideRectangle(points, rectangle)) {
+        if (
+          didBodyFunctionRun == false &&
+          isBodyInsideRectangle(points, rectangle)
+        ) {
           targetx = 500;
           targety = 200;
           setTargetX(500);
@@ -152,7 +143,7 @@ export default function TutorialPage() {
           setIsBodyInsideRect(true);
           setSrcImg("/assets/images/yellow.png");
           setInstruction(instructions.hand);
-          didBodyFunctionRun = true
+          didBodyFunctionRun = true;
         }
 
         if (targetx == 500 && targety == 200 && checkLeftHand()) {
@@ -163,9 +154,7 @@ export default function TutorialPage() {
             "/assets/images/yellow.png",
             instructions.hand
           );
-        }
-
-        else if (targetx == 100 && targety == 200 && checkRightHand()) {
+        } else if (targetx == 100 && targety == 200 && checkRightHand()) {
           nextInstructionAndTarget(
             350,
             500,
@@ -173,9 +162,7 @@ export default function TutorialPage() {
             "/assets/images/red.png",
             instructions.knee
           );
-        }
-
-        else if (targetx == 350 && targety == 500 && checkLeftKnee()) {
+        } else if (targetx == 350 && targety == 500 && checkLeftKnee()) {
           nextInstructionAndTarget(
             150,
             500,
@@ -183,11 +170,13 @@ export default function TutorialPage() {
             "/assets/images/red.png",
             instructions.knee
           );
-        }
-
-        else if (targetx == 150 && targety == 500 && checkRightKnee()) {
+        } else if (targetx == 150 && targety == 500 && checkRightKnee()) {
           // go to the game play page.
-          router.push("/gameplay");
+          camera?.stop();
+          router.replace({
+            pathname: "/gameplay/[username]",
+            query: { username: router.query.username },
+          });
         }
       }
     }
@@ -314,7 +303,7 @@ export default function TutorialPage() {
       ) {
         camera = new cam.Camera(webcamRef.current.video, {
           onFrame: async () => {
-            await poseEstimator.send({ image: webcamRef.current.video });
+            await poseEstimator.send({ image: webcamRef?.current?.video });
           },
           width: 620,
           height: 720,
@@ -353,9 +342,10 @@ export default function TutorialPage() {
           x={rectangle.xPositionStart}
           y={rectangle.yPositionStart}
         />
-          
-        { isBodyInsideRect && <Target x={targetX} y={targetY} alt={altImg} src={srcImg} /> }
-        
+
+        {isBodyInsideRect && (
+          <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
+        )}
       </Box>
     </Box>
   );

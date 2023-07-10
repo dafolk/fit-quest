@@ -1,7 +1,7 @@
 const instructions = {
-  start: <div>Move into the frame to start</div>,
+  start: <span>Move into the frame to start</span>,
   hand: (
-    <div>
+    <span>
       Try to touch the
       <span className="highlight">
         {" "}
@@ -22,10 +22,10 @@ const instructions = {
           }
         `}</style>
       </span>
-    </div>
+    </span>
   ),
   knee: (
-    <div>
+    <span>
       Try to touch the{" "}
       <span className="highlight">
         {" "}
@@ -46,7 +46,7 @@ const instructions = {
           }
         `}</style>
       </span>
-    </div>
+    </span>
   ),
 };
 

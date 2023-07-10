@@ -1,9 +1,14 @@
 import { Typography } from "@mui/material";
 
-const CustomTitle = ({ text }) => {
+const CustomTitle = ({ text, fontSize }) => {
   return (
     <Typography
-      sx={{ mt: "50px", mb: "20px", fontSize: "36px", textAlign: "center" }}
+      sx={{
+        mt: "50px",
+        mb: "20px",
+        fontSize: fontSize ? fontSize : "36px",
+        textAlign: "center",
+      }}
     >
       {text}
     </Typography>
