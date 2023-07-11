@@ -187,7 +187,10 @@ export default function TutorialPage() {
 
         else if (targetx == 150 && targety == 500 && checkRightKnee()) {
           // go to the game play page.
-          router.push("/gameplay");
+          router.replace({
+            pathname: "/gameplay/[username]",
+            query: { username: router.query.username },
+          });
         }
       }
     }
@@ -320,11 +323,19 @@ export default function TutorialPage() {
           height: 720,
           facingMode: "user",
         });
-        camera.start();
+        
+        const interval = setInterval(() => {
+          camera.start();
+        }, 3000);
+      }
+      else{
+        clearInterval(interval);
+        camera.stop();
       }
     };
 
-    runPoseEstimation();
+      runPoseEstimation();
+
   }, [router.query.username]);
 
   return (

@@ -38,6 +38,7 @@ export default function Gameplay() {
 
   let targetx = 500,
     targety = 200;
+  let timerCount=30;
   const targetWidth = 100;
   const targetHeight = 100;
   const heightMidpoint = 720 / 2;
@@ -94,13 +95,16 @@ export default function Gameplay() {
           
           nextInstructionAndTarget(
             Math.random() * (videoWidth - targetWidth),
-            Math.random() * (heightMidpoint - targetHeight) + heightMidpoint,
+            Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint,
             "red",
             "/assets/images/red.png",
           );
         }
 
         else if (targety > 360 && (checkLeftKnee() || checkRightKnee())) {
+
+          setScore((prevScore) => prevScore + 1);
+
           nextInstructionAndTarget(
             Math.random() * (videoWidth - targetWidth),
             Math.random() * (heightMidpoint - targetHeight),
@@ -191,43 +195,47 @@ export default function Gameplay() {
     }
   }
 
-  useEffect(() => {
-    const runPoseEstimation = async () => {
-      const poseEstimator = new Pose({
-        locateFile: (file) => {
-          return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+  
+  const runPoseEstimation = async () => {
+    const poseEstimator = new Pose({
+      locateFile: (file) => {
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+      },
+    });
+
+    poseEstimator.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      enableSegmentation: false,
+      smoothSegmentation: false,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5,
+    });
+
+    poseEstimator.onResults(onPoseResults);
+    poseEstimatorRef.current = poseEstimator;
+
+    if (
+      typeof webcamRef.current !== "undefined" &&
+      webcamRef.current !== null
+    ) {
+      camera = new cam.Camera(webcamRef.current.video, {
+        onFrame: async () => {
+          await poseEstimator.send({ image: webcamRef.current.video });
         },
+        width: 620,
+        height: 720,
+        facingMode: "user",
       });
-
-      poseEstimator.setOptions({
-        modelComplexity: 1,
-        smoothLandmarks: true,
-        enableSegmentation: false,
-        smoothSegmentation: false,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
-
-      poseEstimator.onResults(onPoseResults);
-      poseEstimatorRef.current = poseEstimator;
-
-      if (
-        typeof webcamRef.current !== "undefined" &&
-        webcamRef.current !== null
-      ) {
-        camera = new cam.Camera(webcamRef.current.video, {
-          onFrame: async () => {
-            await poseEstimator.send({ image: webcamRef.current.video });
-          },
-          width: 620,
-          height: 720,
-          facingMode: "user",
-        });
-        camera.start();
-      }
-    };
-
+      camera.start();
+    }
+  };
+  
+  useEffect(() => {
+    
     runPoseEstimation();
+
+
   }, [router.query.username]);
   return (
     <Box
@@ -256,3 +264,4 @@ export default function Gameplay() {
   );
 
 }
+
