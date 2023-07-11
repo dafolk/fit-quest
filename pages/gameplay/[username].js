@@ -1,5 +1,3 @@
-
-
 import CustomTitle from "@/components/CustomTitle";
 import Target from "@/components/Target";
 import { Box, Typography } from "@mui/material";
@@ -11,16 +9,14 @@ import * as cam from "@mediapipe/camera_utils";
 import { useRouter } from "next/router";
 
 export default function Gameplay() {
-  
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const poseEstimatorRef = useRef(null);
   const router = useRouter();
-  
+
   let camera = null;
 
-  let 
-    _xPositionOfLeftHandLandmark,
+  let _xPositionOfLeftHandLandmark,
     _xPositionOfRightHandLandmark,
     _xPositionOfLeftKneeLandmark,
     _xPositionOfRightKneeLandmark,
@@ -28,8 +24,8 @@ export default function Gameplay() {
     _yPositionOfRightHandLandmark,
     _yPositionOfLeftKneeLandmark,
     _yPositionOfRightKneeLandmark;
-    
-  
+
+  const [timer, setTimer] = useState(30);
   const [score, setScore] = useState(0);
   const [targetX, setTargetX] = useState(500);
   const [targetY, setTargetY] = useState(200);
@@ -38,7 +34,6 @@ export default function Gameplay() {
 
   let targetx = 500,
     targety = 200;
-  let timerCount=30;
   const targetWidth = 100;
   const targetHeight = 100;
   const heightMidpoint = 720 / 2;
@@ -69,12 +64,7 @@ export default function Gameplay() {
       const lKneeLm = results.poseLandmarks[11]; //25 == left knee; 11 == left shoulder
       const rKneeLm = results.poseLandmarks[12]; //26 == right knee; 12 == right shoulder
 
-      if (
-        lHandLm &&
-        rHandLm &&
-        lKneeLm &&
-        rKneeLm 
-      ) {
+      if (lHandLm && rHandLm && lKneeLm && rKneeLm) {
         _xPositionOfLeftHandLandmark = lHandLm.x * videoWidth;
         _yPositionOfLeftHandLandmark = lHandLm.y * videoHeight;
 
@@ -87,37 +77,28 @@ export default function Gameplay() {
         _xPositionOfRightKneeLandmark = rKneeLm.x * videoWidth;
         _yPositionOfRightKneeLandmark = rKneeLm.y * videoHeight;
 
-
-
         if (targety <= 360 && (checkLeftHand() || checkRightHand())) {
-          
           setScore((prevScore) => prevScore + 1);
-          
           nextInstructionAndTarget(
             Math.random() * (videoWidth - targetWidth),
-            Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint,
+            Math.random() * (heightMidpoint - targetHeight) + heightMidpoint,
             "red",
-            "/assets/images/red.png",
+            "/assets/images/red.png"
           );
         }
 
         else if (targety > 360 && (checkLeftKnee() || checkRightKnee())) {
-
-          setScore((prevScore) => prevScore + 1);
-
           nextInstructionAndTarget(
             Math.random() * (videoWidth - targetWidth),
             Math.random() * (heightMidpoint - targetHeight),
             "yellow",
-            "/assets/images/yellow.png",
+            "/assets/images/yellow.png"
           );
-        }
-        else{
+        } else {
         }
       }
     }
 
-    
     drawLandmarks(canvasCtx, results.poseLandmarks, {
       color: "#00FF00",
       fillColor: "#FF0000",
@@ -127,18 +108,15 @@ export default function Gameplay() {
     canvasCtx.restore();
   }
 
-  function nextInstructionAndTarget(
-    xPosition,
-    yPosition,
-    imgAltText,
-    imgSrc
-  ) {
+  function nextInstructionAndTarget(xPosition, yPosition, imgAltText, imgSrc) {
     targetx = xPosition;
     targety = yPosition;
     setTargetX(xPosition);
     setTargetY(yPosition);
     setAltImg(imgAltText);
     setSrcImg(imgSrc);
+    finalScore++;
+    console.log(finalScore);
   }
 
   function checkLeftHand() {
@@ -195,13 +173,13 @@ export default function Gameplay() {
     }
   }
 
-  
-  const runPoseEstimation = async () => {
-    const poseEstimator = new Pose({
-      locateFile: (file) => {
-        return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
-      },
-    });
+  useEffect(() => {
+    const runPoseEstimation = async () => {
+      const poseEstimator = new Pose({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+        },
+      });
 
     poseEstimator.setOptions({
       modelComplexity: 1,
@@ -215,28 +193,25 @@ export default function Gameplay() {
     poseEstimator.onResults(onPoseResults);
     poseEstimatorRef.current = poseEstimator;
 
-    if (
-      typeof webcamRef.current !== "undefined" &&
-      webcamRef.current !== null
-    ) {
-      camera = new cam.Camera(webcamRef.current.video, {
-        onFrame: async () => {
-          await poseEstimator.send({ image: webcamRef.current.video });
-        },
-        width: 620,
-        height: 720,
-        facingMode: "user",
-      });
-      camera.start();
-    }
-  };
-  
-  useEffect(() => {
-    
+      if (
+        typeof webcamRef.current !== "undefined" &&
+        webcamRef.current !== null
+      ) {
+        camera = new cam.Camera(webcamRef.current.video, {
+          onFrame: async () => {
+            await poseEstimator.send({ image: webcamRef.current.video });
+          },
+          width: 620,
+          height: 720,
+          facingMode: "user",
+        });
+        camera.start();
+      }
+    };
+
     runPoseEstimation();
-
-
   }, [router.query.username]);
+
   return (
     <Box
       margin={"auto"}
@@ -246,7 +221,32 @@ export default function Gameplay() {
       alignItems={"center"}
       width={"450px"}
     >
-      <CustomTitle text="Gameplay" />
+      <Box
+        width={"620px"}
+        display={"flex"}
+        flexDirection={"row"}
+        justifyContent={"space-between"}
+        alignItems={"baseline"}
+      >
+        <Box
+          display={"flex"}
+          flexDirection={"row"}
+          justifyContent={"center"}
+          alignItems={"center"}
+        >
+          <CustomTitle text={"score : "} mr={"10px"} />
+          <CustomTitle text={score} />
+        </Box>
+        <Box
+          display={"flex"}
+          flexDirection={"row"}
+          justifyContent={"center"}
+          alignItems={"baseline"}
+        >
+          <CustomTitle text={timer} fontSize={"60px"} mr={"10px"} />
+          <CustomTitle text={" seconds"} />
+        </Box>
+      </Box>
       <Box
         position={"relative"}
         width={"620px"}
@@ -256,12 +256,51 @@ export default function Gameplay() {
         }}
       >
         <WebCam webcamRef={webcamRef} canvasRef={canvasRef} />
-          
+
         <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
-        
+        <Typography
+          style={{
+            position: "absolute",
+            zIndex: 4,
+            marginLeft: "230px",
+            marginRight: "230px",
+            marginTop: "100px",
+            transform: "scaleX(-1)",
+          }}
+        >
+          Ready ?
+        </Typography>
+        <Box
+          sx={{
+            position: "absolute",
+            zIndex: 4,
+            transform: "scaleX(-1)",
+          }}
+        >
+          <Box
+            sx={{
+              position: "relative",
+              transform: "translate(-385px, 250px)",
+            }}
+          >
+            <img
+              alt="cd"
+              src="/assets/images/CountDown.png"
+              style={{ position: "absolute", borderRadius: "44px  " }}
+            />
+            <Typography
+              sx={{
+                position: "absolute",
+                color: "white",
+                fontSize: "90px",
+                transform: "translate(53px, 15px)",
+              }}
+            >
+              3
+            </Typography>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );
-
 }
-
