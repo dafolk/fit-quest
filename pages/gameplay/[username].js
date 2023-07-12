@@ -96,9 +96,8 @@ export default function Gameplay() {
             "yellow",
             "/assets/images/yellow.png"
           );
-        } else {
         }
-      }
+      } 
     }
 
     drawLandmarks(canvasCtx, results.poseLandmarks, {
@@ -264,6 +263,7 @@ export default function Gameplay() {
       await fetch(endpoint, options);
     }
   };
+
 
   useEffect(() => {
     runPoseEstimation();

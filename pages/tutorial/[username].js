@@ -123,12 +123,12 @@ export default function TutorialPage() {
         const points = [
           [_xPositionOfLeftEyeLandmark, _yPositionOfLefEyeLandmark],
           [_xPositionOfRightEyeLandmark, _yPositionOfRightEyeLandmark],
-          // [_xPositionOfLeftHandLandmark, _yPositionOfLeftHandLandmark],
-          // [_xPositionOfRightHandLandmark, _yPositionOfRightHandLandmark],
-          // [_xPositionOfLeftKneeLandmark, _yPositionOfLeftKneeLandmark],
-          // [_xPositionOfRightKneeLandmark, _yPositionOfRightKneeLandmark],
-          // [_xPositionOfLeftFootLandmark, _yPositionOfLeftFootLandmark],
-          // [_xPositionOfRightFootLandmark, _yPositionOfRightFootLandmark],
+          [_xPositionOfLeftHandLandmark, _yPositionOfLeftHandLandmark],
+          [_xPositionOfRightHandLandmark, _yPositionOfRightHandLandmark],
+          [_xPositionOfLeftKneeLandmark, _yPositionOfLeftKneeLandmark],
+          [_xPositionOfRightKneeLandmark, _yPositionOfRightKneeLandmark],
+          [_xPositionOfLeftFootLandmark, _yPositionOfLeftFootLandmark],
+          [_xPositionOfRightFootLandmark, _yPositionOfRightFootLandmark],
         ];
 
         if (
