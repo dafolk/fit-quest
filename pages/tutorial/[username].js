@@ -1,6 +1,6 @@
 import CustomTitle from "@/components/CustomTitle";
 import Target from "@/components/Target";
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import Frame from "@/components/Frame";
 import WebCam from "@/components/WebCam";
 import React, { useRef, useEffect, useState } from "react";
@@ -12,7 +12,6 @@ import instructions from "./instructions";
 
 export default function TutorialPage() {
   const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
   const poseEstimatorRef = useRef(null);
   const router = useRouter();
   let camera = null;
@@ -59,22 +58,6 @@ export default function TutorialPage() {
   function onPoseResults(results) {
     const videoWidth = webcamRef.current.video.videoWidth;
     const videoHeight = webcamRef.current.video.videoHeight;
-
-    canvasRef.current.width = videoWidth;
-    canvasRef.current.height = videoHeight;
-
-    const canvasElement = canvasRef.current;
-    const canvasCtx = canvasElement.getContext("2d");
-
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-    canvasCtx.drawImage(
-      results.image,
-      0,
-      0,
-      canvasElement.width,
-      canvasElement.height
-    );
 
     if (results.poseLandmarks) {
       const lEyeLm = results.poseLandmarks[2];
@@ -135,9 +118,9 @@ export default function TutorialPage() {
           didBodyFunctionRun == false &&
           isBodyInsideRectangle(points, rectangle)
         ) {
-          targetx = 500;
+          targetx = 400;
           targety = 200;
-          setTargetX(500);
+          setTargetX(400);
           setTargetY(200);
           setAltImg("yellow");
           setIsBodyInsideRect(true);
@@ -145,14 +128,14 @@ export default function TutorialPage() {
           setInstruction(instructions.hand);
           didBodyFunctionRun = true;
         }
-        else if (!isBodyInsideRectangle(points, rectangle)){
-          
+        else if (!isBodyInsideRectangle(points, rectangle)) {
+
           didBodyFunctionRun = false;
           setIsBodyInsideRect(false);
           setInstruction(instructions.start);
         }
 
-        if (targetx == 500 && targety == 200 && checkLeftHand()) {
+        if (targetx == 400 && targety == 200 && checkLeftHand()) {
           nextInstructionAndTarget(
             100,
             200,
@@ -186,14 +169,6 @@ export default function TutorialPage() {
         }
       }
     }
-
-    drawLandmarks(canvasCtx, results.poseLandmarks, {
-      color: "#00FF00",
-      fillColor: "#FF0000",
-      radius: 4,
-    });
-
-    canvasCtx.restore();
   }
 
   function nextInstructionAndTarget(
@@ -340,7 +315,7 @@ export default function TutorialPage() {
           transform: "scaleX(-1)",
         }}
       >
-        <WebCam webcamRef={webcamRef} canvasRef={canvasRef} />
+        <WebCam webcamRef={webcamRef} />
         <Frame
           borderColor={"green"}
           w={rectangle.width}
