@@ -16,29 +16,27 @@ export default function Gameplay() {
 
   let camera = null;
 
-  let _xPositionOfLeftHandLandmark,
-    _xPositionOfRightHandLandmark,
-    _xPositionOfLeftKneeLandmark,
-    _xPositionOfRightKneeLandmark,
-    _yPositionOfLeftHandLandmark,
-    _yPositionOfRightHandLandmark,
-    _yPositionOfLeftKneeLandmark,
-    _yPositionOfRightKneeLandmark;
+  const [xLeftHandLM, setXLeftHandLM] = useState(0);
+  const [xRightHandLM, setXRightHandLM] = useState(0);
+  const [xLeftKneeLM, setXLeftKneeLM] = useState(0);
+  const [xRightKneeLM, setXRightKneeLM] = useState(0);
+  const [yLeftHandLM, setYLeftHandLM] = useState(0);
+  const [yRightHandLM, setYRightHandLM] = useState(0);
+  const [yLeftKneeLM, setYLeftKneeLM] = useState(0);
+  const [yRightKneeLM, setYRightKneeLM] = useState(0);
 
   const [timer, setTimer] = useState(30);
-  const [timerTarget, setTimerTarget] = useState(3);
+  const [timerTarget, setTimerTarget] = useState(1.5);
   const [isTimeOut, setTimeOut] = useState(false);
   const [isTouched, setTouched] = useState(false);
 
   const [score, setScore] = useState(0);
   const [targetX, setTargetX] = useState(500);
   const [targetY, setTargetY] = useState(200);
-  const [altImg, setAltImg] = useState("yellow");
+  const [altImg, setAltImg] = useState('yellow');
   const [srcImg, setSrcImg] = useState("/assets/images/yellow.png");
 
-  let targetx = 500,
-    targety = 200,
-    finalScore = 0;
+  let finalScore = 0;
   const targetWidth = 100;
   const targetHeight = 100;
   const heightMidpoint = 720 / 2;
@@ -70,18 +68,14 @@ export default function Gameplay() {
       const rKneeLm = results.poseLandmarks[12]; //26 == right knee; 12 == right shoulder
 
       if (lHandLm && rHandLm && lKneeLm && rKneeLm) {
-        _xPositionOfLeftHandLandmark = lHandLm.x * videoWidth;
-        _yPositionOfLeftHandLandmark = lHandLm.y * videoHeight;
-
-        _xPositionOfRightHandLandmark = rHandLm.x * videoWidth;
-        _yPositionOfRightHandLandmark = rHandLm.y * videoHeight;
-
-        _xPositionOfLeftKneeLandmark = lKneeLm.x * videoWidth;
-        _yPositionOfLeftKneeLandmark = lKneeLm.y * videoHeight;
-
-        _xPositionOfRightKneeLandmark = rKneeLm.x * videoWidth;
-        _yPositionOfRightKneeLandmark = rKneeLm.y * videoHeight;
-
+        setXLeftHandLM(lHandLm.x * videoWidth);
+        setYLeftHandLM(lHandLm.y * videoHeight);
+        setXRightHandLM(rHandLm.x * videoWidth);
+        setYRightHandLM(rHandLm.y * videoHeight);
+        setXLeftKneeLM(lKneeLm.x * videoWidth);
+        setYLeftKneeLM(lKneeLm.y * videoHeight);
+        setXRightKneeLM(rKneeLm.x * videoWidth);
+        setYRightKneeLM(rKneeLm.y * videoHeight);
       }
 
     }
@@ -95,50 +89,39 @@ export default function Gameplay() {
     canvasCtx.restore();
   }
 
-  function nextInstructionAndTarget(xPosition, yPosition, imgAltText, imgSrc) {
-    targetx = xPosition;
-    targety = yPosition;
-    setTargetX(xPosition);
-    setTargetY(yPosition);
-    setAltImg(imgAltText);
-    setSrcImg(imgSrc);
-    finalScore++;
-    // console.log(finalScore);
-  }
-
   function checkLeftHand() {
     return isLmInsideTargets(
-      _xPositionOfLeftHandLandmark,
-      _yPositionOfLeftHandLandmark,
-      targetx,
-      targety
+      xLeftHandLM,
+      yLeftHandLM,
+      targetX,
+      targetY
     );
   }
 
   function checkRightHand() {
     return isLmInsideTargets(
-      _xPositionOfRightHandLandmark,
-      _yPositionOfRightHandLandmark,
-      targetx,
-      targety
+      xRightHandLM,
+      yRightHandLM,
+      targetX,
+      targetY
     );
   }
 
   function checkLeftKnee() {
     return isLmInsideTargets(
-      _xPositionOfLeftKneeLandmark,
-      _yPositionOfLeftKneeLandmark,
-      targetx,
-      targety
+      xLeftKneeLM,
+      yLeftKneeLM,
+      targetX,
+      targetY
     );
   }
 
   function checkRightKnee() {
     return isLmInsideTargets(
-      _xPositionOfRightKneeLandmark,
-      _yPositionOfRightKneeLandmark,
-      targetx,
-      targety
+      xRightKneeLM,
+      yRightKneeLM,
+      targetX,
+      targetY
     );
   }
 
@@ -251,7 +234,19 @@ export default function Gameplay() {
   };
 
   useEffect(() => {
-    touch();
+    if (targetY < 360 && (checkLeftHand() || checkRightHand())) {
+
+      setScore(score + 1);
+      setTouched(true);
+    }
+    else if (targetY >= 360 && (checkLeftKnee() || checkRightKnee())) {
+
+      setScore(score + 1);
+      setTouched(true);
+    }
+  }, [xLeftHandLM, yLeftHandLM, xRightHandLM, yRightHandLM, xLeftKneeLM, yLeftKneeLM, xRightKneeLM, yRightKneeLM]);
+
+  useEffect(() => {
     if (isTouched) {
       setTouched(false);
       setTimeOut(true);
@@ -261,31 +256,30 @@ export default function Gameplay() {
 
     const interval = setInterval(() => {
       changePlace();
-    }, 3000);
+    }, 1500);
 
     return () => {
       clearTimeout(interval);
       setTimeOut(false);
     };
-  }, [isTouched, isTimeOut]);
+  }, [isTouched, isTimeOut, targetX, targetY]);
 
   useEffect(() => {
     if (isTimeOut) {
-      setTimerTarget(3);
+      setTimerTarget(1.5);
       setTimeOut(false);
 
       return;
     }
 
     const interval = setInterval(() => {
-      if (timerTarget > 1) {
-        setTimerTarget(timerTarget - 1);
+      if (timerTarget >= 1) {
+        setTimerTarget(timerTarget - 0.5);
       } else {
-        setTimerTarget(3);
+        setTimerTarget(1.5);
         setTimeOut(true);
-
       }
-    }, 1000);
+    }, 500);
 
     return () => {
       clearInterval(interval);
@@ -294,40 +288,23 @@ export default function Gameplay() {
   }, [timerTarget, isTimeOut]);
 
   const changePlace = () => {
-    console.log(targety);
-    if (targety < 360) {
-      targetx = Math.random() * (620 - targetWidth);
-      targety = Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint;
-      console.log("<360");
-      console.log(targety);
-      nextInstructionAndTarget(
-        targetx,
-        targety,
-        "red",
-        "/assets/images/red.png"
-      );
-    }
-    else if (targety >= 360) {
-      targetx = Math.random() * (620 - targetWidth);
-      targety = Math.random() * (heightMidpoint - targetHeight);
-      nextInstructionAndTarget(
-        targetx,
-        targety,
-        "yellow",
-        "/assets/images/yellow.png"
-      );
-    }
-  };
-
-  const touch = () => {
-    if (checkLeftHand() || checkRightHand() || checkLeftKnee() || checkRightKnee()) {
-      setScore((prevScore) => prevScore + 1);
-      setTouched(true);
+    if (targetY < 360) {
+      setTargetX(Math.random() * (620 - targetWidth));
+      setTargetY(Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint);
+      setAltImg("red");
+      setSrcImg("/assets/images/red.png");
+    } else if (targetY >= 360) {
+      setTargetX(Math.random() * (620 - targetWidth))
+      setTargetY(Math.random() * (heightMidpoint - targetHeight))
+      setAltImg("yellow");
+      setSrcImg("/assets/images/yellow.png");
     }
   };
 
   useEffect(() => {
+
     runPoseEstimation();
+
     // const interval = setInterval(() => {
     //   if (timerCounter > 0) {
     //     setTimer((prevCount) => --prevCount);
