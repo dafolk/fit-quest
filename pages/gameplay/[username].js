@@ -3,22 +3,18 @@ import Target from "@/components/Target";
 import { Box, Typography } from "@mui/material";
 import WebCam from "@/components/WebCam";
 import React, { useRef, useEffect, useState } from "react";
-import { drawLandmarks } from "@mediapipe/drawing_utils";
 import { Pose } from "@mediapipe/pose";
 import * as cam from "@mediapipe/camera_utils";
 import { useRouter } from "next/router";
 
 export default function Gameplay() {
   const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
   const poseEstimatorRef = useRef(null);
   const router = useRouter();
 
   let camera = null;
   let timerCounter = 30;
-  let timerCounterReady = 5;
 
-  const [cameraA, setCameraA] = useState(null);
   const [xLeftHandLM, setXLeftHandLM] = useState(0);
   const [xRightHandLM, setXRightHandLM] = useState(0);
   const [xLeftKneeLM, setXLeftKneeLM] = useState(0);
@@ -35,7 +31,7 @@ export default function Gameplay() {
   const [isIncrementScore, setIncrementScore] = useState(false);
   const [timerReady, setTimerReady] = useState(5);
   const [firstEffectFinished, setFirstEffectFinished] = useState(false);
-  const [isGameplayFinished, setIsGameplayFinished] = useState(false);
+  const cameraRef = useRef(null);
 
   const [targetX, setTargetX] = useState(500);
   const [targetY, setTargetY] = useState(200);
@@ -51,27 +47,11 @@ export default function Gameplay() {
     const videoWidth = webcamRef.current.video.videoWidth;
     const videoHeight = webcamRef.current.video.videoHeight;
 
-    canvasRef.current.width = videoWidth;
-    canvasRef.current.height = videoHeight;
-
-    const canvasElement = canvasRef.current;
-    const canvasCtx = canvasElement.getContext("2d");
-
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-    canvasCtx.drawImage(
-      results.image,
-      0,
-      0,
-      canvasElement.width,
-      canvasElement.height
-    );
-
     if (results.poseLandmarks) {
       const lHandLm = results.poseLandmarks[19];
       const rHandLm = results.poseLandmarks[20];
-      const lKneeLm = results.poseLandmarks[11]; //25 == left knee; 11 == left shoulder
-      const rKneeLm = results.poseLandmarks[12]; //26 == right knee; 12 == right shoulder
+      const lKneeLm = results.poseLandmarks[25];
+      const rKneeLm = results.poseLandmarks[26];
 
       if (lHandLm && rHandLm && lKneeLm && rKneeLm) {
         setXLeftHandLM(lHandLm.x * videoWidth);
@@ -84,14 +64,6 @@ export default function Gameplay() {
         setYRightKneeLM(rKneeLm.y * videoHeight);
       }
     }
-
-    drawLandmarks(canvasCtx, results.poseLandmarks, {
-      color: "#00FF00",
-      fillColor: "#FF0000",
-      radius: 4,
-    });
-
-    canvasCtx.restore();
   }
 
   function checkLeftHand() {
@@ -151,7 +123,7 @@ export default function Gameplay() {
       typeof webcamRef.current !== "undefined" &&
       webcamRef.current !== null
     ) {
-      camera = new cam.Camera(webcamRef.current.video, {
+      cameraRef.current = new cam.Camera(webcamRef.current.video, {
         onFrame: async () => {
           await poseEstimator.send({ image: webcamRef.current?.video });
         },
@@ -159,7 +131,7 @@ export default function Gameplay() {
         height: 720,
         facingMode: "user",
       });
-      camera.start();
+      cameraRef.current.start();
     }
   };
 
@@ -315,7 +287,7 @@ export default function Gameplay() {
           return prevValue;
         }
       });
-    }, 1000); // 1000 milliseconds = 1 second
+    }, 1000);
 
     return () => {
       clearInterval(interval);
@@ -329,12 +301,16 @@ export default function Gameplay() {
           setTimer((prevCount) => --prevCount);
           --timerCounter;
         } else {
-          storeResult();
-          camera?.stop();
-          router.replace({
-            pathname: "/result/[username]",
-            query: { username: router.query.username },
-          });
+                    
+          if (cameraRef.current) {
+            storeResult();
+            cameraRef.current.stop();
+
+            router.replace({
+              pathname: "/result/[username]",
+              query: { username: router.query.username },
+            });
+          }
         }
       }, 1000);
       return () => {
@@ -386,7 +362,7 @@ export default function Gameplay() {
           transform: "scaleX(-1)",
         }}
       >
-        <WebCam webcamRef={webcamRef} canvasRef={canvasRef} />
+        <WebCam webcamRef={webcamRef}/>
         {firstEffectFinished && (
           <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
         )}

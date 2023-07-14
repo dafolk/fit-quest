@@ -4,7 +4,6 @@ import { Box } from "@mui/material";
 import Frame from "@/components/Frame";
 import WebCam from "@/components/WebCam";
 import React, { useRef, useEffect, useState } from "react";
-import { drawLandmarks } from "@mediapipe/drawing_utils";
 import { Pose } from "@mediapipe/pose";
 import * as cam from "@mediapipe/camera_utils";
 import { useRouter } from "next/router";
