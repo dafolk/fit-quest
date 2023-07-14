@@ -15,7 +15,10 @@ export default function Gameplay() {
   const router = useRouter();
 
   let camera = null;
+  let timerCounter = 30;
+  let timerCounterReady = 5;
 
+  const [cameraA, setCameraA] = useState(null);
   const [xLeftHandLM, setXLeftHandLM] = useState(0);
   const [xRightHandLM, setXRightHandLM] = useState(0);
   const [xLeftKneeLM, setXLeftKneeLM] = useState(0);
@@ -29,6 +32,10 @@ export default function Gameplay() {
   const [timerTarget, setTimerTarget] = useState(1.5);
   const [isTimeOut, setTimeOut] = useState(false);
   const [isTouched, setTouched] = useState(false);
+
+  const [timerReady, setTimerReady] = useState(5);
+  const [firstEffectFinished, setFirstEffectFinished] = useState(false);
+  const [isGameplayFinished, setIsGameplayFinished] = useState(false);
 
   const [score, setScore] = useState(0);
   const [targetX, setTargetX] = useState(500);
@@ -152,7 +159,31 @@ export default function Gameplay() {
         height: 720,
         facingMode: "user",
       });
+      // setCameraA(new cam.Camera(webcamRef.current.video, {
+      //   onFrame: async () => {
+      //     await poseEstimator.send({ image: webcamRef.current?.video });
+      //   },
+      //   width: 620,
+      //   height: 720,
+      //   facingMode: "user",
+      // }));
       camera.start();
+    }
+  };
+
+  const changePlace = () => {
+    if (targetY < 360) {
+      setTargetX(Math.random() * (620 - targetWidth));
+      setTargetY(
+        Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint
+      );
+      setAltImg("red");
+      setSrcImg("/assets/images/red.png");
+    } else if (targetY >= 360) {
+      setTargetX(Math.random() * (620 - targetWidth));
+      setTargetY(Math.random() * (heightMidpoint - targetHeight));
+      setAltImg("yellow");
+      setSrcImg("/assets/images/yellow.png");
     }
   };
 
@@ -213,12 +244,14 @@ export default function Gameplay() {
   };
 
   useEffect(() => {
-    if (targetY < 360 && (checkLeftHand() || checkRightHand())) {
-      setScore(score + 1);
-      setTouched(true);
-    } else if (targetY >= 360 && (checkLeftKnee() || checkRightKnee())) {
-      setScore(score + 1);
-      setTouched(true);
+    if (firstEffectFinished) {
+      if (targetY < 360 && (checkLeftHand() || checkRightHand())) {
+        setScore(score + 1);
+        setTouched(true);
+      } else if (targetY >= 360 && (checkLeftKnee() || checkRightKnee())) {
+        setScore(score + 1);
+        setTouched(true);
+      }
     }
   }, [
     xLeftHandLM,
@@ -232,21 +265,23 @@ export default function Gameplay() {
   ]);
 
   useEffect(() => {
-    if (isTouched) {
-      setTouched(false);
-      setTimeOut(true);
-      changePlace();
-      return;
+    if (firstEffectFinished) {
+      if (isTouched) {
+        setTouched(false);
+        setTimeOut(true);
+        changePlace();
+        return;
+      }
+
+      const interval = setInterval(() => {
+        changePlace();
+      }, 1500);
+
+      return () => {
+        clearTimeout(interval);
+        setTimeOut(false);
+      };
     }
-
-    const interval = setInterval(() => {
-      changePlace();
-    }, 1500);
-
-    return () => {
-      clearTimeout(interval);
-      setTimeOut(false);
-    };
   }, [isTouched, isTimeOut, targetX, targetY]);
 
   useEffect(() => {
@@ -272,45 +307,50 @@ export default function Gameplay() {
     };
   }, [timerTarget, isTimeOut]);
 
-  const changePlace = () => {
-    if (targetY < 360) {
-      setTargetX(Math.random() * (620 - targetWidth));
-      setTargetY(
-        Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint
-      );
-      setAltImg("red");
-      setSrcImg("/assets/images/red.png");
-    } else if (targetY >= 360) {
-      setTargetX(Math.random() * (620 - targetWidth));
-      setTargetY(Math.random() * (heightMidpoint - targetHeight));
-      setAltImg("yellow");
-      setSrcImg("/assets/images/yellow.png");
-    }
-  };
-
   useEffect(() => {
     runPoseEstimation();
-
     const interval = setInterval(() => {
-      if (timerCounter > 0) {
-        setTimer(timer - 1);
-        --timerCounter;
-      } else {
-        console.log(finalScore);
-        if (camera) {
+      setTimerReady((prevValue) => {
+        if (prevValue > 1) {
+          return prevValue - 1;
+        } else {
+          clearInterval(interval);
+          setFirstEffectFinished(true);
+          return prevValue;
+        }
+      });
+    }, 1000); // 1000 milliseconds = 1 second
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [router.query.username]);
+
+  useEffect(() => {
+    // runPoseEstimation();
+
+    if (firstEffectFinished) {
+      const interval = setInterval(() => {
+        if (timerCounter > 0) {
+          setTimer((prevCount) => --prevCount);
+          --timerCounter;
+        } else {
+          // console.log(cameraA);
+          // if (cameraA) {
           storeResult();
-          camera.stop(); // Stop the camera when navigating away from the component
+          // cameraA.stop(); // Stop the camera when navigating away from the component
           router.replace({
             pathname: "/result/[username]",
             query: { username: router.query.username },
           });
+          // }
         }
-      }
-    }, 1000);
-    return () => {
-      clearTimeout(interval);
-    };
-  }, [router.query.username]);
+      }, 1000);
+      return () => {
+        clearTimeout(interval);
+      };
+    }
+  }, [firstEffectFinished]);
 
   return (
     <Box
@@ -356,20 +396,25 @@ export default function Gameplay() {
         }}
       >
         <WebCam webcamRef={webcamRef} canvasRef={canvasRef} />
+        {firstEffectFinished && (
+          <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
+        )}
 
-        <Target x={targetX} y={targetY} alt={altImg} src={srcImg} />
-        <Typography
-          style={{
-            position: "absolute",
-            zIndex: 4,
-            marginLeft: "230px",
-            marginRight: "230px",
-            marginTop: "100px",
-            transform: "scaleX(-1)",
-          }}
-        >
-          Ready ?
-        </Typography>
+        {timerReady >= 0 && !firstEffectFinished && (
+          <Typography
+            style={{
+              position: "absolute",
+              zIndex: 4,
+              marginLeft: "230px",
+              marginRight: "230px",
+              marginTop: "100px",
+              transform: "scaleX(-1)",
+            }}
+          >
+            Ready ?
+          </Typography>
+        )}
+
         <Box
           sx={{
             position: "absolute",
@@ -377,28 +422,30 @@ export default function Gameplay() {
             transform: "scaleX(-1)",
           }}
         >
-          <Box
-            sx={{
-              position: "relative",
-              transform: "translate(-385px, 250px)",
-            }}
-          >
-            <img
-              alt="cd"
-              src="/assets/images/CountDown.png"
-              style={{ position: "absolute", borderRadius: "44px  " }}
-            />
-            <Typography
+          {timerReady >= 0 && !firstEffectFinished && (
+            <Box
               sx={{
-                position: "absolute",
-                color: "white",
-                fontSize: "90px",
-                transform: "translate(53px, 15px)",
+                position: "relative",
+                transform: "translate(-385px, 250px)",
               }}
             >
-              3
-            </Typography>
-          </Box>
+              <img
+                alt="cd"
+                src="/assets/images/CountDown.png"
+                style={{ position: "absolute", borderRadius: "44px  " }}
+              />
+              <Typography
+                sx={{
+                  position: "absolute",
+                  color: "white",
+                  fontSize: "90px",
+                  transform: "translate(53px, 15px)",
+                }}
+              >
+                {timerReady}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>
