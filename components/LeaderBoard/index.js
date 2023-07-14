@@ -36,10 +36,10 @@ const Leaderboard = ({ displayUser }) => {
           justifyContent={"center"}
           alignItems={"space-evenly"}
         >
-          {rankNumber.map((item) => {
+          {Object.keys(displayUser).map((item) => {
             return (
-              <Typography textAlign={"end"} key={item.id}>
-                {item.rank}.
+              <Typography textAlign={"end"} key={item}>
+                {parseInt(item) + 1}.
               </Typography>
             );
           })}

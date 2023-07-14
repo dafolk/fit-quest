@@ -32,18 +32,17 @@ export default function Gameplay() {
   const [timerTarget, setTimerTarget] = useState(1.5);
   const [isTimeOut, setTimeOut] = useState(false);
   const [isTouched, setTouched] = useState(false);
-
+  const [isIncrementScore, setIncrementScore] = useState(false);
   const [timerReady, setTimerReady] = useState(5);
   const [firstEffectFinished, setFirstEffectFinished] = useState(false);
   const [isGameplayFinished, setIsGameplayFinished] = useState(false);
 
-  const [score, setScore] = useState(0);
   const [targetX, setTargetX] = useState(500);
   const [targetY, setTargetY] = useState(200);
   const [altImg, setAltImg] = useState("yellow");
   const [srcImg, setSrcImg] = useState("/assets/images/yellow.png");
 
-  let finalScore = 0;
+  const score = useRef(0);
   const targetWidth = 100;
   const targetHeight = 100;
   const heightMidpoint = 720 / 2;
@@ -128,6 +127,7 @@ export default function Gameplay() {
       return false;
     }
   }
+
   const runPoseEstimation = async () => {
     const poseEstimator = new Pose({
       locateFile: (file) => {
@@ -159,14 +159,6 @@ export default function Gameplay() {
         height: 720,
         facingMode: "user",
       });
-      // setCameraA(new cam.Camera(webcamRef.current.video, {
-      //   onFrame: async () => {
-      //     await poseEstimator.send({ image: webcamRef.current?.video });
-      //   },
-      //   width: 620,
-      //   height: 720,
-      //   facingMode: "user",
-      // }));
       camera.start();
     }
   };
@@ -205,31 +197,21 @@ export default function Gameplay() {
 
     const response = await fetch(endpoint, options);
     const result = await response.json();
-    console.log(result.data);
-    return result.data;
+    console.log(result);
+    return await result;
   };
 
   const storeResult = async () => {
+    console.log(`final store score: ${score.current}`);
     const data = {
       username: router.query.username,
-      score: finalScore,
+      score: score.current,
     };
 
     const JSONdata = JSON.stringify(data);
 
-    if (!checkExistingUser()) {
-      const endpoint = "/api/users";
-
-      const options = {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSONdata,
-      };
-
-      await fetch(endpoint, options).json;
-    } else {
+    if (await checkExistingUser()) {
+      console.log("user updated");
       const endpoint = `/api/users/${router.query.username}`;
 
       const options = {
@@ -240,16 +222,29 @@ export default function Gameplay() {
         body: JSONdata,
       };
       await fetch(endpoint, options);
+    } else {
+      console.log("user created");
+      const endpoint = "/api/users";
+
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSONdata,
+      };
+
+      await fetch(endpoint, options);
     }
   };
 
   useEffect(() => {
     if (firstEffectFinished) {
       if (targetY < 360 && (checkLeftHand() || checkRightHand())) {
-        setScore(score + 1);
+        score.current++;
         setTouched(true);
       } else if (targetY >= 360 && (checkLeftKnee() || checkRightKnee())) {
-        setScore(score + 1);
+        score.current++;
         setTouched(true);
       }
     }
@@ -267,6 +262,7 @@ export default function Gameplay() {
   useEffect(() => {
     if (firstEffectFinished) {
       if (isTouched) {
+        setIncrementScore(true);
         setTouched(false);
         setTimeOut(true);
         changePlace();
@@ -327,23 +323,18 @@ export default function Gameplay() {
   }, [router.query.username]);
 
   useEffect(() => {
-    // runPoseEstimation();
-
     if (firstEffectFinished) {
       const interval = setInterval(() => {
         if (timerCounter > 0) {
           setTimer((prevCount) => --prevCount);
           --timerCounter;
         } else {
-          // console.log(cameraA);
-          // if (cameraA) {
           storeResult();
-          // cameraA.stop(); // Stop the camera when navigating away from the component
+          camera?.stop();
           router.replace({
             pathname: "/result/[username]",
             query: { username: router.query.username },
           });
-          // }
         }
       }, 1000);
       return () => {
@@ -375,7 +366,7 @@ export default function Gameplay() {
           alignItems={"center"}
         >
           <CustomTitle text={"score : "} mr={"10px"} />
-          <CustomTitle text={score} />
+          <CustomTitle text={score.current} />
         </Box>
         <Box
           display={"flex"}

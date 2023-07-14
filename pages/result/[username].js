@@ -26,8 +26,8 @@ export default function Result() {
     const result = await response.json();
 
     currentUser = await {
-      username: result.username,
-      score: result.scores[0].score,
+      username: await result.username,
+      score: await result.scores[0].score,
     };
     setUserScore(await result.scores[0].score);
   };
@@ -91,6 +91,10 @@ export default function Result() {
     );
   };
 
+  const goToStart = () => {
+    router.replace("/");
+  };
+
   useEffect(() => {
     if (router.isReady) {
       getUserScore();
@@ -137,7 +141,7 @@ export default function Result() {
         >
           <Leaderboard displayUser={displayUser} />
         </Box>
-        <CustomButton text={"Done"} />
+        <CustomButton text={"Done"} onClickHandler={goToStart} />
       </Box>
     </Box>
   );

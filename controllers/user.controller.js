@@ -33,7 +33,7 @@ const getUsersWithScores = async () => {
 export const createUser = async (username) => {
   await prisma.users.create({
     data: {
-      username: req.body.username,
+      username: username,
       scores: {
         create: [{ score: req.body.score }],
       },

@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         },
       },
     });
-    res.status(200).json({ data: { username: req.body.username } });
+    res.status(200).json({ username: req.body.username });
   } else if (req.method == "GET") {
     res.status(200).json(await getAllUsers());
   }
