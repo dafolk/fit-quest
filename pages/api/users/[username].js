@@ -1,3 +1,5 @@
+import { getUserWithUsername, updateUser } from "@/controllers/user.controller";
+
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
@@ -6,22 +8,9 @@ export default async function user(req, res) {
   const { username } = req.query;
 
   if (req.method == "GET") {
-    res.status(200).json({
-      data: await prisma.users.findFirst({ where: { username: username } }),
-    });
+    res.status(200).json(await getUserWithUsername(username));
   } else if (req.method == "PUT") {
-    await prisma.users.update({
-      where: { username: username },
-      data: {
-        scores: {
-          create: [
-            {
-              score: req.body.score,
-            },
-          ],
-        },
-      },
-    });
+    const updateResult = await updateUser(username, req.body.score);
     res.status(200).json({
       data: {
         username: req.query.username,

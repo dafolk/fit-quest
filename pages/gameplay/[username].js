@@ -33,7 +33,7 @@ export default function Gameplay() {
   const [score, setScore] = useState(0);
   const [targetX, setTargetX] = useState(500);
   const [targetY, setTargetY] = useState(200);
-  const [altImg, setAltImg] = useState('yellow');
+  const [altImg, setAltImg] = useState("yellow");
   const [srcImg, setSrcImg] = useState("/assets/images/yellow.png");
 
   let finalScore = 0;
@@ -77,7 +77,6 @@ export default function Gameplay() {
         setXRightKneeLM(rKneeLm.x * videoWidth);
         setYRightKneeLM(rKneeLm.y * videoHeight);
       }
-
     }
 
     drawLandmarks(canvasCtx, results.poseLandmarks, {
@@ -90,39 +89,19 @@ export default function Gameplay() {
   }
 
   function checkLeftHand() {
-    return isLmInsideTargets(
-      xLeftHandLM,
-      yLeftHandLM,
-      targetX,
-      targetY
-    );
+    return isLmInsideTargets(xLeftHandLM, yLeftHandLM, targetX, targetY);
   }
 
   function checkRightHand() {
-    return isLmInsideTargets(
-      xRightHandLM,
-      yRightHandLM,
-      targetX,
-      targetY
-    );
+    return isLmInsideTargets(xRightHandLM, yRightHandLM, targetX, targetY);
   }
 
   function checkLeftKnee() {
-    return isLmInsideTargets(
-      xLeftKneeLM,
-      yLeftKneeLM,
-      targetX,
-      targetY
-    );
+    return isLmInsideTargets(xLeftKneeLM, yLeftKneeLM, targetX, targetY);
   }
 
   function checkRightKnee() {
-    return isLmInsideTargets(
-      xRightKneeLM,
-      yRightKneeLM,
-      targetX,
-      targetY
-    );
+    return isLmInsideTargets(xRightKneeLM, yRightKneeLM, targetX, targetY);
   }
 
   function isLmInsideTargets(
@@ -235,16 +214,22 @@ export default function Gameplay() {
 
   useEffect(() => {
     if (targetY < 360 && (checkLeftHand() || checkRightHand())) {
-
+      setScore(score + 1);
+      setTouched(true);
+    } else if (targetY >= 360 && (checkLeftKnee() || checkRightKnee())) {
       setScore(score + 1);
       setTouched(true);
     }
-    else if (targetY >= 360 && (checkLeftKnee() || checkRightKnee())) {
-
-      setScore(score + 1);
-      setTouched(true);
-    }
-  }, [xLeftHandLM, yLeftHandLM, xRightHandLM, yRightHandLM, xLeftKneeLM, yLeftKneeLM, xRightKneeLM, yRightKneeLM]);
+  }, [
+    xLeftHandLM,
+    yLeftHandLM,
+    xRightHandLM,
+    yRightHandLM,
+    xLeftKneeLM,
+    yLeftKneeLM,
+    xRightKneeLM,
+    yRightKneeLM,
+  ]);
 
   useEffect(() => {
     if (isTouched) {
@@ -290,40 +275,41 @@ export default function Gameplay() {
   const changePlace = () => {
     if (targetY < 360) {
       setTargetX(Math.random() * (620 - targetWidth));
-      setTargetY(Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint);
+      setTargetY(
+        Math.random() * (heightMidpoint - targetHeight - 150) + heightMidpoint
+      );
       setAltImg("red");
       setSrcImg("/assets/images/red.png");
     } else if (targetY >= 360) {
-      setTargetX(Math.random() * (620 - targetWidth))
-      setTargetY(Math.random() * (heightMidpoint - targetHeight))
+      setTargetX(Math.random() * (620 - targetWidth));
+      setTargetY(Math.random() * (heightMidpoint - targetHeight));
       setAltImg("yellow");
       setSrcImg("/assets/images/yellow.png");
     }
   };
 
   useEffect(() => {
-
     runPoseEstimation();
 
-    // const interval = setInterval(() => {
-    //   if (timerCounter > 0) {
-    //     setTimer((prevCount) => --prevCount);
-    //     --timerCounter;
-    //   } else {
-    //     console.log(finalScore);
-    //     if (camera) {
-    //       storeResult();
-    //       camera.stop(); // Stop the camera when navigating away from the component
-    //       router.replace({
-    //         pathname: "/result/[username]",
-    //         query: { username: router.query.username },
-    //       });
-    //     }
-    //   }
-    // }, 1000);
-    // return () => {
-    //   clearTimeout(interval);
-    // };
+    const interval = setInterval(() => {
+      if (timerCounter > 0) {
+        setTimer(timer - 1);
+        --timerCounter;
+      } else {
+        console.log(finalScore);
+        if (camera) {
+          storeResult();
+          camera.stop(); // Stop the camera when navigating away from the component
+          router.replace({
+            pathname: "/result/[username]",
+            query: { username: router.query.username },
+          });
+        }
+      }
+    }, 1000);
+    return () => {
+      clearTimeout(interval);
+    };
   }, [router.query.username]);
 
   return (

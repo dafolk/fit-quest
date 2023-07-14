@@ -1,14 +1,14 @@
 import { Box, Typography } from "@mui/material";
 
-const topFive = [
-  { name: "Joe", score: 69, rank: 1 },
-  { name: "Patrick", score: 50, rank: 2 },
-  { name: "Suzie", score: 48, rank: 3 },
-  { name: "Traivs", score: 45, rank: 4 },
-  { name: "Amalin", score: 40, rank: 5 },
+const rankNumber = [
+  { id: 1, rank: 1 },
+  { id: 2, rank: 2 },
+  { id: 3, rank: 3 },
+  { id: 4, rank: 4 },
+  { id: 5, rank: 5 },
 ];
 
-const Leaderboard = () => {
+const Leaderboard = ({ displayUser }) => {
   return (
     <Box margin={"20px"}>
       <Box
@@ -36,8 +36,12 @@ const Leaderboard = () => {
           justifyContent={"center"}
           alignItems={"space-evenly"}
         >
-          {topFive.map((item) => {
-            return <Typography textAlign={"end"}>{item.rank}.</Typography>;
+          {rankNumber.map((item) => {
+            return (
+              <Typography textAlign={"end"} key={item.id}>
+                {item.rank}.
+              </Typography>
+            );
           })}
         </Box>
         <Box
@@ -47,8 +51,12 @@ const Leaderboard = () => {
           justifyContent={"center"}
           alignItems={"space-evenly"}
         >
-          {topFive.map((item) => {
-            return <Typography textAlign={"center"}>{item.name}</Typography>;
+          {displayUser.map((item) => {
+            return (
+              <Typography textAlign={"center"} key={item.id}>
+                {item.username}
+              </Typography>
+            );
           })}
         </Box>
         <Box
@@ -58,8 +66,12 @@ const Leaderboard = () => {
           justifyContent={"center"}
           alignItems={"space-evenly"}
         >
-          {topFive.map((item) => {
-            return <Typography textAlign={"center"}>{item.score}</Typography>;
+          {displayUser.map((item) => {
+            return (
+              <Typography key={item.id} textAlign={"center"}>
+                {item.score}
+              </Typography>
+            );
           })}
         </Box>
       </Box>

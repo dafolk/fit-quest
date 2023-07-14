@@ -20,7 +20,7 @@ export default async function handler(req, res) {
     });
     res.status(200).json({ data: { username: req.body.username } });
   } else if (req.method == "GET") {
-    res.status(200).json({ data: await prisma.users.findMany() });
+    res.status(200).json(await getAllUsers());
   }
   // try {
   //   const users = await prisma.users.findMany();

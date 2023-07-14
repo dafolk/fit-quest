@@ -3,7 +3,18 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 export const getAllUsers = async () => {
-  return await prisma.users.findMany();
+  return await prisma.users.findMany({
+    include: {
+      scores: {
+        orderBy: {
+          score: "desc",
+        },
+        select: {
+          score: true,
+        },
+      },
+    },
+  });
 };
 
 const getUsersWithScores = async () => {
@@ -22,22 +33,43 @@ const getUsersWithScores = async () => {
 export const createUser = async (username) => {
   await prisma.users.create({
     data: {
-      username: username,
+      username: req.body.username,
+      scores: {
+        create: [{ score: req.body.score }],
+      },
     },
   });
 };
 
-const getUserWithUsername = async (username) => {
+export const getUserWithUsername = async (username) => {
   return await prisma.users.findFirst({
     where: {
       username: username,
     },
+    include: {
+      scores: {
+        orderBy: {
+          created_at: "desc",
+        },
+        select: {
+          score: true,
+        },
+      },
+    },
   });
 };
 
-const updateUser = async (id, data) => {
+export const updateUser = async (username, score) => {
   return await prisma.users.update({
-    where: { id: id },
-    data: { data },
+    where: { username: username },
+    data: {
+      scores: {
+        create: [
+          {
+            score: score,
+          },
+        ],
+      },
+    },
   });
 };

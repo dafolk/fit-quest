@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 
-const ScoreBoard = () => {
+const ScoreBoard = ({ userScore, userRank }) => {
   return (
     <Box
       sx={{
@@ -40,8 +40,8 @@ const ScoreBoard = () => {
             alignItems: "flex-end",
           }}
         >
-          <Typography>27</Typography>
-          <Typography>14</Typography>
+          <Typography>{userScore}</Typography>
+          <Typography>{userRank}</Typography>
         </Box>
       </Box>
     </Box>
