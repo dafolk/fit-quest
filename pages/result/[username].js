@@ -26,10 +26,10 @@ export default function Result() {
     const result = await response.json();
 
     currentUser = await {
-      username: await result.username,
-      score: await result.scores[0].score,
+      username: await result?.username,
+      score: await result?.scores[0].score,
     };
-    setUserScore(await result.scores[0].score);
+    setUserScore(await result?.scores[0].score);
   };
 
   const getTopPlayers = async () => {
@@ -70,8 +70,8 @@ export default function Result() {
         })
         .findIndex(
           (item) =>
-            item.username == currentUser.username &&
-            item.score == currentUser.score
+            item.username == currentUser?.username &&
+            item.score == currentUser?.score
         )) + 1
     );
     console.log(
@@ -85,8 +85,8 @@ export default function Result() {
         })
         .findIndex(
           (item) =>
-            item.username == currentUser.username &&
-            item.score == currentUser.score
+            item.username == currentUser?.username &&
+            item.score == currentUser?.score
         )) + 1
     );
   };
@@ -101,7 +101,7 @@ export default function Result() {
       getTopPlayers();
       getRank();
     }
-  }, [router.isReady]);
+  }, [router.isReady, currentUser]);
 
   return (
     <Box
