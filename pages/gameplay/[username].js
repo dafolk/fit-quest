@@ -12,7 +12,6 @@ export default function Gameplay() {
   const poseEstimatorRef = useRef(null);
   const router = useRouter();
 
-  let camera = null;
   let timerCounter = 30;
 
   const [xLeftHandLM, setXLeftHandLM] = useState(0);
@@ -28,7 +27,6 @@ export default function Gameplay() {
   const [timerTarget, setTimerTarget] = useState(1.5);
   const [isTimeOut, setTimeOut] = useState(false);
   const [isTouched, setTouched] = useState(false);
-  const [isIncrementScore, setIncrementScore] = useState(false);
   const [timerReady, setTimerReady] = useState(5);
   const [firstEffectFinished, setFirstEffectFinished] = useState(false);
   const cameraRef = useRef(null);
@@ -169,12 +167,10 @@ export default function Gameplay() {
 
     const response = await fetch(endpoint, options);
     const result = await response.json();
-    console.log(result);
     return await result;
   };
 
   const storeResult = async () => {
-    console.log(`final store score: ${score.current}`);
     const data = {
       username: router.query.username,
       score: score.current,
@@ -183,7 +179,6 @@ export default function Gameplay() {
     const JSONdata = JSON.stringify(data);
 
     if (await checkExistingUser()) {
-      console.log("user updated");
       const endpoint = `/api/users/${router.query.username}`;
 
       const options = {
@@ -195,7 +190,6 @@ export default function Gameplay() {
       };
       await fetch(endpoint, options);
     } else {
-      console.log("user created");
       const endpoint = "/api/users";
 
       const options = {
@@ -214,9 +208,11 @@ export default function Gameplay() {
     if (firstEffectFinished) {
       if (targetY < 360 && (checkLeftHand() || checkRightHand())) {
         score.current++;
+        changePlace();
         setTouched(true);
       } else if (targetY >= 360 && (checkLeftKnee() || checkRightKnee())) {
         score.current++;
+        changePlace();
         setTouched(true);
       }
     }
@@ -234,10 +230,9 @@ export default function Gameplay() {
   useEffect(() => {
     if (firstEffectFinished) {
       if (isTouched) {
-        setIncrementScore(true);
         setTouched(false);
         setTimeOut(true);
-        changePlace();
+        // changePlace();
         return;
       }
 
